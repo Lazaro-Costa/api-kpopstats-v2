@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// prisma/schema.prisma
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Company {
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  name          String
+  founding_date DateTime?
+  headquarters  String?
+  ceo           String?
+  more_info     String?
+
+  groups Group[]
+
+  idols Idol[]
+
+  pictures Pic? @relation(fields: [picsId], references: [id])
+  picsId   Int?
+
+  @@map("companys")
+}
+
+model Idol {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name         String
+  korean_name  String?
+  foreign_name String?
+  nationality  String?
+  date_birth   DateTime?
+  solist       Boolean
+  more_info    String?
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId Int
+
+  group   Group? @relation(fields: [groupId], references: [id])
+  groupId Int?
+
+  pictures Pic? @relation(fields: [picsId], references: [id])
+  picsId   Int?
+
+  @@map("idols")
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name        String
+  fandom_name String?
+  debut_date  DateTime?
+  more_info   String?
+
+  idols Idol[]
+
+  company   Company @relation(fields: [companyId], references: [id])
+  companyId Int
+
+  pictures Pic? @relation(fields: [picsId], references: [id])
+  picsId   Int?
+
+  @@map("groups")
+}
+
+model Pic {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  name      String
+
+  Company Company[]
+  Idol    Idol[]
+  Group   Group[]
+
+  profiles Profile[]
+  banners  Banner[]
+
+  @@map("pics")
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  url       String
+
+  Pic   Pic @relation(fields: [picId], references: [id])
+  picId Int
+
+  @@map("profiles")
+}
+
+model Banner {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  url       String
+
+  Pic   Pic @relation(fields: [picId], references: [id])
+  picId Int
+
+  @@map("banners")
+}
