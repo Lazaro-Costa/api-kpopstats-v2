@@ -31,6 +31,11 @@ export class IdolsController {
     return this.idolsService.findOne(+id);
   }
 
+  @Get('related/:id')
+  findRelated(@Param('id') id: string) {
+    return this.idolsService.findRelated(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateIdolDto: UpdateIdolDto) {
     return this.idolsService.update(+id, updateIdolDto);

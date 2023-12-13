@@ -16,6 +16,9 @@ export class IdolsService {
   findOne(id: number) {
     return this.repository.findOne(id);
   }
+  findRelated(id: number) {
+    return this.repository.findRelated(id);
+  }
 
   update(id: number, updateIdolDto: UpdateIdolDto) {
     return this.repository.update(id, updateIdolDto);
