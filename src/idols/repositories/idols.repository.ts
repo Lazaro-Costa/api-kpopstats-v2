@@ -90,6 +90,97 @@ export class IdolsRepository {
     });
   }
 
+  async findRelated(id: number) {
+    return this.prisma.idol.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        company: {
+          select: {
+            id: true,
+            name: true,
+            ceo: true,
+            headquarters: true,
+            pictures: {
+              select: {
+                id: true,
+                name: true,
+                banners: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+                profiles: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+            fandom_name: true,
+            pictures: {
+              select: {
+                id: true,
+                name: true,
+                banners: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+                profiles: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+              },
+            },
+            idols: {
+              where: {
+                id: {
+                  not: id,
+                },
+              },
+              select: {
+                id: true,
+                name: true,
+                pictures: {
+                  select: {
+                    id: true,
+                    name: true,
+                    banners: {
+                      select: {
+                        id: true,
+                        url: true,
+                      },
+                    },
+                    profiles: {
+                      select: {
+                        id: true,
+                        url: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        solist: true,
+      },
+    });
+  }
+
   async update(id: number, updateIdolDto: UpdateIdolDto) {
     return this.prisma.idol.update({
       where: {

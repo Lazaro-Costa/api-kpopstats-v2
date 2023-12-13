@@ -77,6 +77,67 @@ export class GroupsRepository {
       },
     });
   }
+  async findRelated(id: number) {
+    return this.prisma.group.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        name: true,
+        fandom_name: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            ceo: true,
+            headquarters: true,
+            pictures: {
+              select: {
+                id: true,
+                name: true,
+                banners: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+                profiles: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        idols: {
+          select: {
+            id: true,
+            name: true,
+            pictures: {
+              select: {
+                id: true,
+                name: true,
+                banners: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+                profiles: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
   async findOne(id: number) {
     return this.prisma.group.findUnique({

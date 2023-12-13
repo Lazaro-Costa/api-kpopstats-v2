@@ -26,6 +26,11 @@ export class GroupsController {
     return this.groupsService.findAll(+page);
   }
 
+  @Get('/related/:id')
+  findRelated(@Param('id') id: string) {
+    return this.groupsService.findRelated(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.groupsService.findOne(+id);
