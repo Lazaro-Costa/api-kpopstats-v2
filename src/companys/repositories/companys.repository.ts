@@ -14,7 +14,7 @@ export class CompanysRepository {
   }
 
   async findAll(page: number) {
-    const itemsPerPage = 3;
+    const itemsPerPage = 10;
     const skip = (page - 1) * itemsPerPage;
 
     return this.prisma.company.findMany({
@@ -25,6 +25,7 @@ export class CompanysRepository {
           select: {
             id: true,
             name: true,
+            fandom_name: true,
             idols: {
               select: {
                 id: true,
@@ -47,26 +48,81 @@ export class CompanysRepository {
       },
     });
   }
-
-  async findOne(id: number) {
-    return this.prisma.company.findUnique({
+  async findRelated(id: number, page: number) {
+    const itemsPerPage = 10;
+    const skip = (page - 1) * itemsPerPage;
+    const company = await this.prisma.company.findUnique({
       where: {
         id,
       },
-      include: {
+      select: {
         groups: {
           select: {
-            id: true,
+            fandom_name: true,
             name: true,
-            idols: {
+            id: true,
+            companyId: true,
+            company: {
               select: {
                 id: true,
                 name: true,
               },
             },
+            pictures: {
+              select: {
+                id: true,
+                name: true,
+                banners: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+                profiles: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+              },
+            },
+            idols: {
+              select: {
+                id: true,
+                name: true,
+                companyId: true,
+                pictures: {
+                  select: {
+                    id: true,
+                    name: true,
+                    banners: {
+                      select: {
+                        id: true,
+                        url: true,
+                      },
+                    },
+                    profiles: {
+                      select: {
+                        id: true,
+                        url: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
+      },
+    });
+    const solist = await this.prisma.company.findUnique({
+      where: {
+        id,
+      },
+      select: {
         idols: {
+          skip,
+          take: itemsPerPage,
           where: {
             solist: {
               not: false,
@@ -75,6 +131,47 @@ export class CompanysRepository {
           select: {
             id: true,
             name: true,
+          },
+        },
+      },
+    });
+    if (company && Array.isArray(solist) && solist.idols.length > 0) {
+      return {
+        ...company,
+        solist,
+      };
+    } else if (company) {
+      return company;
+    }
+  }
+  async findOne(id: number) {
+    return this.prisma.company.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        name: true,
+        id: true,
+        ceo: true,
+        headquarters: true,
+        founding_date: true,
+        more_info: true,
+        pictures: {
+          select: {
+            id: true,
+            name: true,
+            banners: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+            profiles: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
           },
         },
       },

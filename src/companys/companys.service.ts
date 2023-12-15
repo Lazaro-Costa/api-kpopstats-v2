@@ -10,8 +10,12 @@ export class CompanysService {
     return this.repository.create(createCompanyDto);
   }
 
-  async findAll(page: number) {
+  findAll(page: number) {
     return this.repository.findAll(page);
+  }
+
+  findRelated(id: number, page: number) {
+    return this.repository.findRelated(id, page);
   }
 
   findOne(id: number) {
