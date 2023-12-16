@@ -12,6 +12,7 @@ import { BannersModule } from './banners/banners.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { HomeController } from './home/home.controller';
+import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -25,6 +26,7 @@ import { HomeController } from './home/home.controller';
     PicsModule,
     ProfilesModule,
     BannersModule,
+    UsersModule,
   ],
   controllers: [AppController, HomeController],
   providers: [AppService],
