@@ -1,11 +1,16 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateIdolDto } from '../dto/create-idol.dto';
 import { UpdateIdolDto } from '../dto/update-idol.dto';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class IdolsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async create(createIdolDto: CreateIdolDto) {
     return this.prisma.idol.create({
@@ -181,20 +186,95 @@ export class IdolsRepository {
     });
   }
 
-  async update(id: number, updateIdolDto: UpdateIdolDto) {
-    return this.prisma.idol.update({
-      where: {
-        id,
+  async resume(page: number) {
+    const itemsPerPage = 10;
+    const skip = (page - 1) * itemsPerPage;
+    return this.prisma.idol.findMany({
+      skip,
+      take: itemsPerPage,
+      select: {
+        id: true,
+        name: true,
+        nationality: true,
+        date_birth: true,
+        foreign_name: true,
+        korean_name: true,
+        more_info: true,
+        solist: true,
+        groupId: true,
+        companyId: true,
+        picsId: true,
+        pictures: {
+          select: {
+            id: true,
+            name: true,
+            banners: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+            profiles: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
-      data: updateIdolDto,
     });
   }
 
-  async remove(id: number) {
-    return this.prisma.idol.delete({
-      where: {
-        id,
-      },
-    });
+  async update(id: number, updateIdolDto: UpdateIdolDto, req: Request) {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestException('Unauthorized');
+      }
+      //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
+
+      return this.prisma.idol.update({
+        where: {
+          id,
+        },
+        data: updateIdolDto,
+      });
+    } catch (error) {
+      throw new BadRequestException('Unauthenticated');
+    }
+  }
+
+  async remove(id: number, req: Request) {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestException('Unauthorized');
+      }
+
+      return this.prisma.idol.delete({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException('Unauthenticated');
+    }
   }
 }

@@ -25,6 +25,8 @@ export class UsersRepository {
       },
     });
     delete user.password;
+    delete user.createdAt;
+    delete user.updatedAt;
     return user;
   }
 
@@ -64,6 +66,8 @@ export class UsersRepository {
         },
       });
       delete user.password;
+      delete user.createdAt;
+      delete user.updatedAt;
       return user;
     } catch (error) {
       throw new BadRequestException('Unauthenticated');

@@ -25,17 +25,17 @@ export class PicsController {
     return this.picsService.findAll();
   }
 
-  @Get(':id')
+  @Get('find/:id')
   findOne(@Param('id') id: string) {
     return this.picsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   update(@Param('id') id: string, @Body() updatePicDto: UpdatePicDto) {
     return this.picsService.update(+id, updatePicDto);
   }
 
-  @Delete(':id')
+  @Delete('del/:id')
   remove(@Param('id') id: string) {
     return this.picsService.remove(+id);
   }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { GroupsRepository } from './repositories/groups.repository';
+import { Request } from 'express';
 
 @Injectable()
 export class GroupsService {
@@ -22,11 +23,15 @@ export class GroupsService {
     return this.repository.findOne(id);
   }
 
-  update(id: number, updateGroupDto: UpdateGroupDto) {
-    return this.repository.update(id, updateGroupDto);
+  resume(page: number) {
+    return this.repository.resume(page);
   }
 
-  remove(id: number) {
-    return this.repository.remove(id);
+  update(id: number, updateGroupDto: UpdateGroupDto, req: Request) {
+    return this.repository.update(id, updateGroupDto, req);
+  }
+
+  remove(id: number, req: Request) {
+    return this.repository.remove(id, req);
   }
 }
