@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CompanysRepository } from './repositories/companys.repository';
+import { Request } from 'express';
 
 @Injectable()
 export class CompanysService {
@@ -22,11 +23,15 @@ export class CompanysService {
     return this.repository.findOne(id);
   }
 
-  update(id: number, updateCompanyDto: UpdateCompanyDto) {
-    return this.repository.update(id, updateCompanyDto);
+  resume(page: number) {
+    return this.repository.resume(page);
   }
 
-  remove(id: number) {
-    return this.repository.remove(id);
+  update(id: number, updateCompanyDto: UpdateCompanyDto, req: Request) {
+    return this.repository.update(id, updateCompanyDto, req);
+  }
+
+  remove(id: number, req: Request) {
+    return this.repository.remove(id, req);
   }
 }

@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { IdolsService } from './idols.service';
 import { CreateIdolDto } from './dto/create-idol.dto';
 import { UpdateIdolDto } from './dto/update-idol.dto';
+import { Request } from 'express';
 
 @Controller('idols')
 export class IdolsController {
@@ -26,7 +28,7 @@ export class IdolsController {
     return this.idolsService.findAll(+page);
   }
 
-  @Get(':id')
+  @Get('find/:id')
   findOne(@Param('id') id: string) {
     return this.idolsService.findOne(+id);
   }
@@ -36,13 +38,22 @@ export class IdolsController {
     return this.idolsService.findRelated(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateIdolDto: UpdateIdolDto) {
-    return this.idolsService.update(+id, updateIdolDto);
+  @Get('resume')
+  resume(@Query('page') page = 1) {
+    return this.idolsService.resume(page);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.idolsService.remove(+id);
+  @Patch('update/:id')
+  update(
+    @Param('id') id: string,
+    @Body() updateIdolDto: UpdateIdolDto,
+    @Req() req: Request,
+  ) {
+    return this.idolsService.update(+id, updateIdolDto, req);
+  }
+
+  @Delete('del/:id')
+  remove(@Param('id') id: string, @Req() req: Request) {
+    return this.idolsService.remove(+id, req);
   }
 }

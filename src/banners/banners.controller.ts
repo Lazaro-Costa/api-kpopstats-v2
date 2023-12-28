@@ -29,17 +29,17 @@ export class BannersController {
     return this.bannersService.findAll_Entity(entity);
   }
 
-  @Get(':id')
+  @Get('find/:id')
   findOne(@Param('id') id: string) {
     return this.bannersService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   update(@Param('id') id: string, @Body() updateBannerDto: UpdateBannerDto) {
     return this.bannersService.update(+id, updateBannerDto);
   }
 
-  @Delete(':id')
+  @Delete('del/:id')
   remove(@Param('id') id: string) {
     return this.bannersService.remove(id);
   }

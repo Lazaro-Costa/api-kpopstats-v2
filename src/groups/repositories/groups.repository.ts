@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class GroupsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
   async create(createGroupDto: CreateGroupDto) {
     return this.prisma.group.create({
       data: createGroupDto,
@@ -194,35 +199,100 @@ export class GroupsRepository {
       },
     });
   }
-
-  async update(id: number, updateGroupDto: UpdateGroupDto) {
-    return this.prisma.group.update({
-      where: {
-        id,
-      },
-      data: updateGroupDto,
-      include: {
+  async resume(page: number) {
+    const itemsPerPage = 10;
+    const skip = (page - 1) * itemsPerPage;
+    return this.prisma.group.findMany({
+      skip,
+      take: itemsPerPage,
+      select: {
+        id: true,
+        name: true,
+        debut_date: true,
+        fandom_name: true,
+        more_info: true,
+        companyId: true,
+        picsId: true,
         company: {
           select: {
             id: true,
             name: true,
           },
         },
-        idols: {
+        pictures: {
           select: {
             id: true,
             name: true,
+            banners: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+            profiles: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
           },
         },
       },
     });
   }
 
-  async remove(id: number) {
-    return this.prisma.group.delete({
-      where: {
-        id,
-      },
-    });
+  async update(id: number, updateGroupDto: UpdateGroupDto, req: Request) {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestException('Unauthorized');
+      }
+      //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
+
+      return this.prisma.group.update({
+        where: {
+          id,
+        },
+        data: updateGroupDto,
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          idols: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+    } catch (err) {
+      throw new BadRequestException('Unauthenticated');
+    }
+  }
+
+  async remove(id: number, req: Request) {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestException('Unauthorized');
+      }
+      //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
+
+      return this.prisma.group.delete({
+        where: {
+          id,
+        },
+      });
+    } catch (e) {
+      throw new BadRequestException('Unauthenticated');
+    }
   }
 }

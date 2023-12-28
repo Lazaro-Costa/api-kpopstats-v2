@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateIdolDto } from './dto/create-idol.dto';
 import { UpdateIdolDto } from './dto/update-idol.dto';
 import { IdolsRepository } from './repositories/idols.repository';
+import { Request } from 'express';
 
 @Injectable()
 export class IdolsService {
@@ -19,12 +20,15 @@ export class IdolsService {
   findRelated(id: number) {
     return this.repository.findRelated(id);
   }
-
-  update(id: number, updateIdolDto: UpdateIdolDto) {
-    return this.repository.update(id, updateIdolDto);
+  resume(page: number) {
+    return this.repository.resume(page);
   }
 
-  remove(id: number) {
-    return this.repository.remove(id);
+  update(id: number, updateIdolDto: UpdateIdolDto, req: Request) {
+    return this.repository.update(id, updateIdolDto, req);
+  }
+
+  remove(id: number, req: Request) {
+    return this.repository.remove(id, req);
   }
 }
