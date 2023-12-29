@@ -6,6 +6,9 @@ import { UnauthorizedInterceptor } from './common/erros/interceptors/unauthorize
 import { NotFoundErrorInterceptor } from './common/erros/interceptors/notfounderror.interceptor';
 import { BadRequestInterceptor } from './common/erros/interceptors/badrequest.interceptor';
 
+import { ConflictInterceptor } from './common/erros/interceptors/conflict.interceptor';
+import { DatabaseInterceptor } from './common/erros/interceptors/database.interceptor';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
@@ -22,6 +25,8 @@ async function bootstrap() {
   }); // Enable CORS
 
   // app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ConflictInterceptor());
+  app.useGlobalInterceptors(new DatabaseInterceptor());
   app.useGlobalInterceptors(new UnauthorizedInterceptor());
   app.useGlobalInterceptors(new NotFoundErrorInterceptor());
   app.useGlobalInterceptors(new BadRequestInterceptor());
