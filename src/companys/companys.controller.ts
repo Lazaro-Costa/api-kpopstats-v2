@@ -19,8 +19,8 @@ export class CompanysController {
   constructor(private readonly companysService: CompanysService) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companysService.create(createCompanyDto);
+  create(@Body() createCompanyDto: CreateCompanyDto, @Req() req: Request) {
+    return this.companysService.create(createCompanyDto, req);
   }
 
   @Get()

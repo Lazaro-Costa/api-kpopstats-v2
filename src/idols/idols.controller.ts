@@ -19,8 +19,8 @@ export class IdolsController {
   constructor(private readonly idolsService: IdolsService) {}
 
   @Post()
-  create(@Body() createIdolDto: CreateIdolDto) {
-    return this.idolsService.create(createIdolDto);
+  create(@Body() createIdolDto: CreateIdolDto, @Req() req: Request) {
+    return this.idolsService.create(createIdolDto, req);
   }
 
   @Get()

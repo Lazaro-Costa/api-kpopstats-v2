@@ -7,8 +7,8 @@ import { Request } from 'express';
 @Injectable()
 export class CompanysService {
   constructor(private readonly repository: CompanysRepository) {}
-  create(createCompanyDto: CreateCompanyDto) {
-    return this.repository.create(createCompanyDto);
+  create(createCompanyDto: CreateCompanyDto, req: Request) {
+    return this.repository.create(createCompanyDto, req);
   }
 
   findAll(page: number) {
