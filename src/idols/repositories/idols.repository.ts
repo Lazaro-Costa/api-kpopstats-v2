@@ -1,9 +1,11 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateIdolDto } from '../dto/create-idol.dto';
 import { UpdateIdolDto } from '../dto/update-idol.dto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { NotFoundError } from 'src/common/erros/types/NotFoundError';
+import { BadRequestError } from 'src/common/erros/types/BadRequestError';
 
 @Injectable()
 export class IdolsRepository {
@@ -12,24 +14,36 @@ export class IdolsRepository {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(createIdolDto: CreateIdolDto) {
-    return this.prisma.idol.create({
-      data: createIdolDto,
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
+  async create(createIdolDto: CreateIdolDto, req: Request) {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestError();
+      }
+      //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
+
+      return this.prisma.idol.create({
+        data: createIdolDto,
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          group: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-        group: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
+      });
+    } catch (error) {
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
+    }
   }
 
   async findAll(page: number) {
@@ -56,43 +70,51 @@ export class IdolsRepository {
   }
 
   async findOne(id: number) {
-    return this.prisma.idol.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
-          },
+    try {
+      const idol = await this.prisma.idol.findUnique({
+        where: {
+          id,
         },
-        group: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        pictures: {
-          select: {
-            id: true,
-            name: true,
-            banners: {
-              select: {
-                id: true,
-                url: true,
-              },
-            },
-            profiles: {
-              select: {
-                id: true,
-                url: true,
-              },
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
             },
           },
+          group: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          pictures: {
+            select: {
+              id: true,
+              name: true,
+              banners: {
+                select: {
+                  id: true,
+                  url: true,
+                },
+              },
+              profiles: {
+                select: {
+                  id: true,
+                  url: true,
+                },
+              },
+            },
+          },
         },
-      },
-    });
+      });
+      if (!idol) {
+        throw new NotFoundError();
+      }
+      return idol;
+    } catch (error) {
+      throw new NotFoundError('Idol not found');
+    }
   }
 
   async findRelated(id: number) {
@@ -244,7 +266,7 @@ export class IdolsRepository {
       const data = await this.jwtService.verifyAsync(cookie);
 
       if (!data) {
-        throw new BadRequestException('Unauthorized');
+        throw new BadRequestError();
       }
       //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
 
@@ -255,7 +277,7 @@ export class IdolsRepository {
         data: updateIdolDto,
       });
     } catch (error) {
-      throw new BadRequestException('Unauthenticated');
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
     }
   }
 
@@ -265,7 +287,7 @@ export class IdolsRepository {
       const data = await this.jwtService.verifyAsync(cookie);
 
       if (!data) {
-        throw new BadRequestException('Unauthorized');
+        throw new BadRequestError();
       }
 
       return this.prisma.idol.delete({
@@ -274,7 +296,7 @@ export class IdolsRepository {
         },
       });
     } catch (error) {
-      throw new BadRequestException('Unauthenticated');
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
     }
   }
 }

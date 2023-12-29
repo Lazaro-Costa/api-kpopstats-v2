@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCompanyDto } from '../dto/create-company.dto';
 import { UpdateCompanyDto } from '../dto/update-company.dto';
 import { CompanyEntity } from '../entities/company.entity';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { BadRequestError } from 'src/common/erros/types/BadRequestError';
+import { NotFoundError } from 'src/common/erros/types/NotFoundError';
 
 @Injectable()
 export class CompanysRepository {
@@ -12,10 +14,25 @@ export class CompanysRepository {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
-  async create(createCompanyDto: CreateCompanyDto): Promise<CompanyEntity> {
-    return this.prisma.company.create({
-      data: createCompanyDto,
-    });
+  async create(
+    createCompanyDto: CreateCompanyDto,
+    req: Request,
+  ): Promise<CompanyEntity> {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestError();
+      }
+      //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
+
+      return this.prisma.company.create({
+        data: createCompanyDto,
+      });
+    } catch (error) {
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
+    }
   }
 
   async findAll(page: number) {
@@ -150,37 +167,43 @@ export class CompanysRepository {
     }
   }
   async findOne(id: number) {
-    return this.prisma.company.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        name: true,
-        id: true,
-        ceo: true,
-        headquarters: true,
-        founding_date: true,
-        more_info: true,
-        pictures: {
-          select: {
-            id: true,
-            name: true,
-            banners: {
-              select: {
-                id: true,
-                url: true,
+    try {
+      const company = await this.prisma.company.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          name: true,
+          id: true,
+          ceo: true,
+          headquarters: true,
+          founding_date: true,
+          more_info: true,
+          pictures: {
+            select: {
+              id: true,
+              name: true,
+              banners: {
+                select: {
+                  id: true,
+                  url: true,
+                },
               },
-            },
-            profiles: {
-              select: {
-                id: true,
-                url: true,
+              profiles: {
+                select: {
+                  id: true,
+                  url: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+      if (!company) throw new NotFoundError();
+      return company;
+    } catch (error) {
+      throw new NotFoundError('Company not found');
+    }
   }
   async resume(page: number) {
     const itemsPerPage = 10;
@@ -225,7 +248,7 @@ export class CompanysRepository {
       const data = await this.jwtService.verifyAsync(cookie);
 
       if (!data) {
-        throw new BadRequestException('Unauthorized');
+        throw new BadRequestError();
       }
       //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
 
@@ -236,7 +259,7 @@ export class CompanysRepository {
         data: updateCompanyDto,
       });
     } catch (e) {
-      throw new BadRequestException('Unauthenticated');
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
     }
   }
 
@@ -246,7 +269,7 @@ export class CompanysRepository {
       const data = await this.jwtService.verifyAsync(cookie);
 
       if (!data) {
-        throw new BadRequestException('Unauthorized');
+        throw new BadRequestError();
       }
       //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
 
@@ -256,7 +279,7 @@ export class CompanysRepository {
         },
       });
     } catch (e) {
-      throw new BadRequestException('Unauthenticated');
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
     }
   }
 }

@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { UpdateGroupDto } from '../dto/update-group.dto';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { BadRequestError } from 'src/common/erros/types/BadRequestError';
+import { NotFoundError } from 'src/common/erros/types/NotFoundError';
 
 @Injectable()
 export class GroupsRepository {
@@ -11,18 +13,30 @@ export class GroupsRepository {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
-  async create(createGroupDto: CreateGroupDto) {
-    return this.prisma.group.create({
-      data: createGroupDto,
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
+  async create(createGroupDto: CreateGroupDto, req: Request) {
+    try {
+      const cookie = req.cookies['jwt'];
+      const data = await this.jwtService.verifyAsync(cookie);
+
+      if (!data) {
+        throw new BadRequestError();
+      }
+      //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
+
+      return this.prisma.group.create({
+        data: createGroupDto,
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
+    }
   }
 
   async findAll(page: number) {
@@ -145,59 +159,67 @@ export class GroupsRepository {
   }
 
   async findOne(id: number) {
-    return this.prisma.group.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
-          },
+    try {
+      const group = await this.prisma.group.findUnique({
+        where: {
+          id,
         },
-        pictures: {
-          select: {
-            id: true,
-            name: true,
-            banners: {
-              select: {
-                id: true,
-                url: true,
-              },
-            },
-            profiles: {
-              select: {
-                id: true,
-                url: true,
-              },
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
             },
           },
-        },
-        idols: {
-          include: {
-            pictures: {
-              select: {
-                id: true,
-                name: true,
-                banners: {
-                  select: {
-                    id: true,
-                    url: true,
-                  },
+          pictures: {
+            select: {
+              id: true,
+              name: true,
+              banners: {
+                select: {
+                  id: true,
+                  url: true,
                 },
-                profiles: {
-                  select: {
-                    id: true,
-                    url: true,
-                  },
+              },
+              profiles: {
+                select: {
+                  id: true,
+                  url: true,
                 },
               },
             },
           },
+          idols: {
+            include: {
+              pictures: {
+                select: {
+                  id: true,
+                  name: true,
+                  banners: {
+                    select: {
+                      id: true,
+                      url: true,
+                    },
+                  },
+                  profiles: {
+                    select: {
+                      id: true,
+                      url: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-      },
-    });
+      });
+      if (!group) {
+        throw new NotFoundError();
+      }
+      return group;
+    } catch (error) {
+      throw new NotFoundError('Group not found!');
+    }
   }
   async resume(page: number) {
     const itemsPerPage = 10;
@@ -247,7 +269,7 @@ export class GroupsRepository {
       const data = await this.jwtService.verifyAsync(cookie);
 
       if (!data) {
-        throw new BadRequestException('Unauthorized');
+        throw new BadRequestError();
       }
       //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
 
@@ -272,7 +294,7 @@ export class GroupsRepository {
         },
       });
     } catch (err) {
-      throw new BadRequestException('Unauthenticated');
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
     }
   }
 
@@ -282,7 +304,7 @@ export class GroupsRepository {
       const data = await this.jwtService.verifyAsync(cookie);
 
       if (!data) {
-        throw new BadRequestException('Unauthorized');
+        throw new BadRequestError();
       }
       //Posteriormente adicionar Role e verificar se a role do usuário é admin ou moderador
 
@@ -292,7 +314,7 @@ export class GroupsRepository {
         },
       });
     } catch (e) {
-      throw new BadRequestException('Unauthenticated');
+      throw new BadRequestError('Invalid Cookie or Unauthenticated');
     }
   }
 }

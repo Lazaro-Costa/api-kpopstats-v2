@@ -7,8 +7,8 @@ import { Request } from 'express';
 @Injectable()
 export class GroupsService {
   constructor(private readonly repository: GroupsRepository) {}
-  create(createGroupDto: CreateGroupDto) {
-    return this.repository.create(createGroupDto);
+  create(createGroupDto: CreateGroupDto, req: Request) {
+    return this.repository.create(createGroupDto, req);
   }
 
   findAll(page: number) {
