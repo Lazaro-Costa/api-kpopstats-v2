@@ -125,3 +125,5 @@ model User {
   username  String   @unique()
   password  String
 }
+
+//Adicionar role para os usuários
