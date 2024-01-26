@@ -69,6 +69,56 @@ export class IdolsRepository {
     });
   }
 
+  async findallV2() {
+    return this.prisma.idol.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        korean_name: true,
+        foreign_name: true,
+        nationality: true,
+        date_birth: true,
+        solist: true,
+        more_info: true,
+        companyId: true,
+        groupId: true,
+        picsId: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        pictures: {
+          select: {
+            id: true,
+            name: true,
+            banners: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+            profiles: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: number) {
     try {
       const idol = await this.prisma.idol.findUnique({

@@ -14,6 +14,9 @@ export class CompanysService {
   findAll(page: number) {
     return this.repository.findAll(page);
   }
+  findallV2() {
+    return this.repository.findAllV2();
+  }
 
   findRelated(id: number, page: number) {
     return this.repository.findRelated(id, page);

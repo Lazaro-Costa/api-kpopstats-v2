@@ -27,6 +27,10 @@ export class GroupsController {
   findAll(@Query('page') page = 1) {
     return this.groupsService.findAll(+page);
   }
+  @Get('all')
+  findAllV2() {
+    return this.groupsService.findAllV2();
+  }
 
   @Get('related/:id')
   findRelated(@Param('id') id: string) {
