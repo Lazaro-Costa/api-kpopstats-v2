@@ -70,6 +70,39 @@ export class CompanysRepository {
       },
     });
   }
+  async findAllV2() {
+    return this.prisma.company.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        founding_date: true,
+        headquarters: true,
+        ceo: true,
+        more_info: true,
+        picsId: true,
+        pictures: {
+          select: {
+            id: true,
+            name: true,
+            banners: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+            profiles: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
   async findRelated(id: number, page: number) {
     const itemsPerPage = 10;
     const skip = (page - 1) * itemsPerPage;

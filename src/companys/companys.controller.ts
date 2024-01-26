@@ -28,6 +28,11 @@ export class CompanysController {
     return this.companysService.findAll(+page);
   }
 
+  @Get('all')
+  findallV2() {
+    return this.companysService.findallV2();
+  }
+
   @Get('related/:id')
   findRelated(@Param('id') id: string, @Query('page') page = 1) {
     return this.companysService.findRelated(+id, +page);

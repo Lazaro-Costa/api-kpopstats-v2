@@ -15,6 +15,10 @@ export class GroupsService {
     return this.repository.findAll(page);
   }
 
+  findAllV2() {
+    return this.repository.findAllV2();
+  }
+
   findRelated(id: number) {
     return this.repository.findRelated(id);
   }

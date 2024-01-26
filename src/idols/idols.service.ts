@@ -14,6 +14,10 @@ export class IdolsService {
     return this.repository.findAll(page);
   }
 
+  findallV2() {
+    return this.repository.findallV2();
+  }
+
   findOne(id: number) {
     return this.repository.findOne(id);
   }

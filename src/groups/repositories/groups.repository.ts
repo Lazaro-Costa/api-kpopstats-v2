@@ -96,6 +96,81 @@ export class GroupsRepository {
       },
     });
   }
+
+  async findAllV2() {
+    return this.prisma.group.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        fandom_name: true,
+        debut_date: true,
+        more_info: true,
+        companyId: true,
+        picsId: true,
+        pictures: {
+          select: {
+            id: true,
+            name: true,
+            banners: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+            profiles: {
+              select: {
+                id: true,
+                url: true,
+              },
+            },
+          },
+        },
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        idols: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            name: true,
+            korean_name: true,
+            foreign_name: true,
+            nationality: true,
+            date_birth: true,
+            solist: true,
+            more_info: true,
+            companyId: true,
+            groupId: true,
+            picsId: true,
+            pictures: {
+              select: {
+                id: true,
+                name: true,
+                banners: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+                profiles: {
+                  select: {
+                    id: true,
+                    url: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
   async findRelated(id: number) {
     return this.prisma.group.findUnique({
       where: {

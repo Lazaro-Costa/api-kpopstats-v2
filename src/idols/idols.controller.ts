@@ -28,6 +28,11 @@ export class IdolsController {
     return this.idolsService.findAll(+page);
   }
 
+  @Get('all')
+  findallV2() {
+    return this.idolsService.findallV2();
+  }
+
   @Get('find/:id')
   findOne(@Param('id') id: string) {
     return this.idolsService.findOne(+id);
